@@ -16,6 +16,8 @@ class LocationController extends Controller {
         $locationModel->beginTransaction();
 
         $districts = $locationModel->getDistricts($db);
+
+        $locationModel->commitTransaction();
         
 
         return response()->json([
@@ -26,4 +28,49 @@ class LocationController extends Controller {
             ]
         ], 200);
     }
+
+    public function getCircles(Request $request) {
+        $locationModel = new LocationModel();
+        $db = $locationModel->set_connection($request->dist_code);
+        $locationModel->beginTransaction();
+
+        $circles = $locationModel->getCircles($db, $request->dist_code);
+
+        $locationModel->commitTransaction();
+
+        return response()->json([
+            'data' => [
+                'status' => 200,
+                'msg' => 'Successfully Retrieved Data!',
+                'data' => $circles
+            ]
+        ], 200);
+    }
+
+
+
+    // public function insertTest() {
+    //     $locationModel = new LocationModel();
+    //     $db = $locationModel->set_connection();
+    //     $locationModel->beginTransaction();
+
+    //     $status = $locationModel->insertTest($db, [
+    //         'dist_code' => '00',
+    //         'subdiv_code' => '00',
+    //         'cir_code' => '00',
+    //         'mouza_pargona_code' => '00',
+    //         'lot_no' => '00',
+    //         'vill_townprt_code' => '00',
+    //         'unique_loc_code' => '34534',
+    //         'loc_name' => 'test'
+    //     ]);
+
+    //     $locationModel->rollbackTransaction();
+
+    //     var_dump($status);
+    //     die;
+
+
+    // }
+
 }
