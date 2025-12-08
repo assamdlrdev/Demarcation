@@ -10,15 +10,7 @@ use Illuminate\Support\Facades\Validator;
 class LocationController extends Controller {
 
     public function getDistricts() {
-
-        $locationModel = new LocationModel();
-        $db = $locationModel->set_connection('17');
-        $locationModel->beginTransaction();
-
-        $districts = $locationModel->getDistricts($db);
-
-        $locationModel->commitTransaction();
-        
+        $districts = config('constants.DEMARCATION_DISTRICTS');
 
         return response()->json([
             'data' => [
