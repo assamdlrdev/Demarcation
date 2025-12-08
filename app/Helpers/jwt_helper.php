@@ -3,8 +3,9 @@
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
 
-function jwtencode($data) {
-    
+function jwtencode($payload) {
+    $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
+    return $token;
 }
 
 function jwtdecode($token) {
@@ -18,3 +19,4 @@ function jwtdecode($token) {
 
     return $decodedToken;
 }
+
