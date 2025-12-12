@@ -15,67 +15,23 @@ class CitizenApplications extends Controller
     /**
      * Store a newly created citizen application.
      */
-    public function store(Request $request){
-        $rules = [
-            'dist_code'             => 'required|string',
-            'subdiv_code'           => 'required|string',
-            'cir_code'              => 'required|string',
-            'mouza_pargona_code'    => 'required|string',
-            'lot_no'                => 'required|string',
-            'vill_townprt_code'     => 'required|string',
-            'pattadar_id'           => 'required|numeric',
-            'dag_no'                => 'required|string',
-            'dag_area_b'            => 'required|numeric',
-            'dag_area_k'            => 'required|numeric',
-            'dag_area_lc'           => 'required|numeric',
-            'app_dag_area_b'        => 'required|numeric',
-            'app_dag_area_k'        => 'required|numeric',
-            'app_dag_area_lc'       => 'required|numeric',
-            'patta_type_code'       => 'required|string',
-            'patta_no'              => 'required|string',
-            'land_class_code'       => 'required|string',
-            'land_photo'            => 'required|file|max:5120|mimes:jpg,jpeg,png,pdf'
+    public function store(Request $request)
+    {
+        $mapping = [
+            'bigha' => 'app_dag_area_b',
+            'katha' => 'app_dag_area_k',
+            'lessa' => 'app_dag_area_lc',
+            'dagNumber' => 'dag_no',
+            'pattaNumber' => 'patta_no',
+            'pattaType' => 'patta_type_code',
+            'pattadarId' => 'pattadar_id',
         ];
 
-        $data = [];
-        foreach ($mapping as $frontendKey => $backendKey) {
-            if ($request->has($frontendKey)) {
-                $data[$backendKey] = $request->input($frontendKey);
+        foreach ($mapping as $front => $back) {
+            if ($request->filled($front)) {
+                $request->merge([$back => $request->input($front)]);
             }
         }
-
-        // Add other fields that already match backend names
-        $otherFields = [
-            'dist_code',
-            'subdiv_code',
-            'cir_code',
-            'mouza_pargona_code',
-            'lot_no',
-            'vill_townprt_code',
-            'dag_area_b',
-            'dag_area_k',
-            'dag_area_lc',
-            'app_dag_area_b',
-            'app_dag_area_k',
-            'app_dag_area_lc',
-            'land_class_code',
-            'land_photo'
-        ];
-
-        foreach ($otherFields as $field) {
-            if ($request->has($field)) {
-                $data[$field] = $request->input($field);
-            }
-        }
-
-        //test
-        // return response()->json([
-        //             'data' => [
-        //                 'message' => 'Duplicate application found.',
-        //                 'status' => 200,
-        //                 'data' => $data
-        //             ]
-        //         ], 200);
 
         $rules = [
             'dist_code' => 'required|string',
@@ -99,7 +55,7 @@ class CitizenApplications extends Controller
             'land_photo' => 'nullable|string'  //todo
         ];
 
-        $validator = Validator::make($data, $rules);
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->passes()) {
             $duplicate = DemarcationDagArea::join('citizen_applications', 'citizen_applications.id', '=', 'demarcation_dag_areas.citizen_application_id')
@@ -125,21 +81,21 @@ class CitizenApplications extends Controller
             if ($request->app_dag_area_b > $request->dag_area_b) {
                 return response()->json([
                     'data' => [
-                        'message' => 'Applied dag area cannot be greater than existing dag area.1',
+                        'message' => 'Applied dag area cannot be greater than existing dag area.',
                         'status' => 422
                     ]
                 ], 422);
             } elseif ($request->dag_area_b == $request->app_dag_area_b && $request->app_dag_area_k > $request->dag_area_k) {
                 return response()->json([
                     'data' => [
-                        'message' => 'Applied dag area cannot be greater than existing dag area.2',
+                        'message' => 'Applied dag area cannot be greater than existing dag area.',
                         'status' => 422
                     ]
                 ], 422);
             } elseif ($request->dag_area_b == $request->app_dag_area_b && $request->dag_area_k == $request->app_dag_area_k && $request->app_dag_area_lc > $request->dag_area_lc) {
                 return response()->json([
                     'data' => [
-                        'message' => 'Applied dag area cannot be greater than existing dag area.3',
+                        'message' => 'Applied dag area cannot be greater than existing dag area.',
                         'status' => 422
                     ]
                 ], 422);
@@ -192,7 +148,7 @@ class CitizenApplications extends Controller
                             DB::commit();
                             return response()->json([
                                 'data' => [
-                                    'message' => 'Application saved successfully.',
+                                    'message' => 'Your request has been submitted successfully.',
                                     'status' => 200
                                 ]
                             ], 200);
