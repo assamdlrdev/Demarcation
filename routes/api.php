@@ -17,5 +17,7 @@ Route::post('store-application', [App\Http\Controllers\Api\CitizenApplications::
     Route::post('get-pattatypes-landclasses', [App\Http\Controllers\Api\LocationController::class, 'getPattaTypesLandClasses']);
     Route::post('get-pattanos', [App\Http\Controllers\Api\LocationController::class, 'getPattaNos']);
     Route::post('get-dags', [App\Http\Controllers\Api\LocationController::class, 'getDags']);
+    Route::post('get-pattadar-list', [App\Http\Controllers\Api\LocationController::class, 'getPattadarList']);
+
 // });
 

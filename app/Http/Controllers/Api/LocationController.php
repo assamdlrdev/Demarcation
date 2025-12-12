@@ -7,9 +7,11 @@ use App\Models\LocationModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class LocationController extends Controller {
+class LocationController extends Controller
+{
 
-    public function getDistricts() {
+    public function getDistricts()
+    {
         $districts = config('constants.DEMARCATION_DISTRICTS');
 
         return response()->json([
@@ -21,7 +23,8 @@ class LocationController extends Controller {
         ], 200);
     }
 
-    public function getSubdivs(Request $request) {
+    public function getSubdivs(Request $request)
+    {
         $dist_code = $request->dist_code;
         $data = [];
         $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getSubdivs";
@@ -46,7 +49,7 @@ class LocationController extends Controller {
         }
 
         $subdivData = json_decode($api_output['data']);
-        if($subdivData->responseType != 2) {
+        if ($subdivData->responseType != 2) {
             $response = [
                 'status' => 'n',
                 'msg' => $subdivData->data
@@ -81,7 +84,8 @@ class LocationController extends Controller {
         // ], 200);
     }
 
-    public function getCircles(Request $request) {
+    public function getCircles(Request $request)
+    {
         $dist_code = $request->dist_code;
         $subdiv_code = $request->subdiv_code;
         $data = [];
@@ -106,7 +110,7 @@ class LocationController extends Controller {
         }
 
         $circleData = json_decode($api_output['data']);
-        if($circleData->responseType != 2) {
+        if ($circleData->responseType != 2) {
             $response = [
                 'status' => 'n',
                 'msg' => $circleData->data
@@ -141,7 +145,8 @@ class LocationController extends Controller {
         // ], 200);
     }
 
-    public function getMouzas(Request $request) {
+    public function getMouzas(Request $request)
+    {
         $dist_code = $request->dist_code;
         $subdiv_code = $request->subdiv_code;
         $cir_code = $request->cir_code;
@@ -168,7 +173,7 @@ class LocationController extends Controller {
         }
 
         $mouzaData = json_decode($api_output['data']);
-        if($mouzaData->responseType != 2) {
+        if ($mouzaData->responseType != 2) {
             $response = [
                 'status' => 'n',
                 'msg' => $mouzaData->data
@@ -205,7 +210,8 @@ class LocationController extends Controller {
         // ], 200);
     }
 
-    public function getLots(Request $request) {
+    public function getLots(Request $request)
+    {
         $dist_code = $request->dist_code;
         $subdiv_code = $request->subdiv_code;
         $cir_code = $request->cir_code;
@@ -234,7 +240,7 @@ class LocationController extends Controller {
         }
 
         $lotData = json_decode($api_output['data']);
-        if($lotData->responseType != 2) {
+        if ($lotData->responseType != 2) {
             $response = [
                 'status' => 'n',
                 'msg' => $lotData->data
@@ -272,7 +278,8 @@ class LocationController extends Controller {
         // ], 200);
     }
 
-    public function getVills(Request $request) {
+    public function getVills(Request $request)
+    {
         $dist_code = $request->dist_code;
         $subdiv_code = $request->subdiv_code;
         $cir_code = $request->cir_code;
@@ -303,7 +310,7 @@ class LocationController extends Controller {
         }
 
         $villData = json_decode($api_output['data']);
-        if($villData->responseType != 2) {
+        if ($villData->responseType != 2) {
             $response = [
                 'status' => 'n',
                 'msg' => $villData->data
@@ -340,7 +347,8 @@ class LocationController extends Controller {
         // ], 200);
     }
 
-    public function getPattaTypesLandClasses(Request $request) {
+    public function getPattaTypesLandClasses(Request $request)
+    {
         $dist_code = $request->dist_code;
         $data = [];
         $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getLandClassesAndPattaTypes";
@@ -363,7 +371,7 @@ class LocationController extends Controller {
         }
 
         $landClassesAndPattaTypesData = json_decode($api_output['data']);
-        if($landClassesAndPattaTypesData->status != 'y') {
+        if ($landClassesAndPattaTypesData->status != 'y') {
             $response = [
                 'status' => 'n',
                 'msg' => $landClassesAndPattaTypesData->msg
@@ -372,7 +380,7 @@ class LocationController extends Controller {
                 'data' => $response
             ], 500);
         }
-        
+
         $land_classes = $landClassesAndPattaTypesData->data->land_classes;
         $patta_types = $landClassesAndPattaTypesData->data->patta_types;
         $land_groups = $landClassesAndPattaTypesData->data->land_groups;
@@ -390,7 +398,8 @@ class LocationController extends Controller {
         ], 200);
     }
 
-    public function getPattaNos(Request $request) {
+    public function getPattaNos(Request $request)
+    {
         $dist_code = $request->dist_code;
         $subdiv_code = $request->subdiv_code;
         $cir_code = $request->cir_code;
@@ -398,9 +407,9 @@ class LocationController extends Controller {
         $lot_no = $request->lot_no;
         $vill_townprt_code = $request->vill_townprt_code;
         $patta_type_code = $request->patta_type_code;
-        
+
         $data = [];
-         $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getPattaNos";
+        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getPattaNos";
         $method = 'POST';
         $data['dist_code'] = $dist_code;
         $data['subdiv_code'] = $subdiv_code;
@@ -425,7 +434,7 @@ class LocationController extends Controller {
         }
 
         $pattaNoData = json_decode($api_output['data']);
-        if($pattaNoData->status != 'y') {
+        if ($pattaNoData->status != 'y') {
             $response = [
                 'status' => 'n',
                 'msg' => $pattaNoData->msg,
@@ -436,7 +445,7 @@ class LocationController extends Controller {
             ], 500);
         }
         $pattaNos = $pattaNoData->data;
-        if(empty($pattaNos)){
+        if (empty($pattaNos)) {
             $response = [
                 'status' => 'n',
                 'msg' => 'no data available!'
@@ -456,14 +465,15 @@ class LocationController extends Controller {
         ], 200);
     }
 
-    public function getDags(Request $request) {
+    public function getDags(Request $request)
+    {
         $dist_code = $request->dist_code;
         $subdiv_code = $request->subdiv_code;
         $cir_code = $request->cir_code;
         $mouza_pargona_code = $request->mouza_pargona_code;
         $lot_no = $request->lot_no;
         $vill_townprt_code = $request->vill_townprt_code;
-        
+
         $data = [];
         $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getDags";
         $method = 'POST';
@@ -476,7 +486,7 @@ class LocationController extends Controller {
         $data['apikey'] = "chithaentry_resurvey";
         $api_output = callApi($url, $method, $data);
 
-        if(!$api_output || $api_output['status'] != 'y') {
+        if (!$api_output || $api_output['status'] != 'y') {
             $response = [
                 'status' => 'n',
                 'msg' => 'API Failed!',
@@ -489,7 +499,7 @@ class LocationController extends Controller {
         }
 
         $dagResponse = json_decode($api_output['data']);
-        if($dagResponse->responseType != 2) {
+        if ($dagResponse->responseType != 2) {
             $response = [
                 'status' => 'n',
                 'msg' => $dagResponse->data
@@ -499,7 +509,7 @@ class LocationController extends Controller {
             ], 500);
         }
 
-        if($dagResponse->data == 'N') {
+        if ($dagResponse->data == 'N') {
             $response = [
                 'status' => 'n',
                 'msg' => 'No dags available!'
@@ -518,6 +528,82 @@ class LocationController extends Controller {
             'data' => $response
         ], 200);
 
+    }
+
+    public function getPattadarList(Request $request)
+    {
+        $data['dist_code'] = $request->dist_code;
+        $data['subdiv_code'] = $request->subdiv_code;
+        $data['cir_code'] = $request->cir_code;
+        $data['mouza_pargona_code'] = $request->mouza_pargona_code; //
+        $data['lot_no'] = $request->lot_no;
+        $data['vil_townpart_code'] = $request->vil_townpart_code;
+        $data['patta_no'] = $request->patta_no;
+        $data['patta_type_code'] = $request->patta_type_code;
+
+        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getPattadarForDemarcation";
+        $method = 'POST';
+
+        $data['apikey'] = "chithaentry_resurvey";
+
+        $api_output = callApi($url, $method, $data);
+        $this->test($api_output); exit;
+
+        if ($api_output['status'] != 'y') {
+            // log_message("error", 'LAND HUB API FAIL LMController');
+            $response = [
+                'status' => 'n',
+                'msg' => 'API Failed!',
+                'error' => $api_output['error_code'],
+                'data' => $api_output['data']
+            ];
+            return response()->json([
+                'data' => $response
+            ], 500);
+        }
+
+        $subdivData = json_decode($api_output['data']);
+
+        if ($subdivData->responseType != 2) {
+            $response = [
+                'status' => 'n',
+                'msg' => $subdivData->data
+            ];
+            return response()->json([
+                'data' => $response
+            ], 500);
+        }
+
+        $response = [
+            'status' => 'y',
+            'msg' => 'Data successfully retreived!',
+            'data' => $subdivData->data
+        ];
+        return response()->json([
+            'data' => $response
+        ], 200);
+
+        // $locationModel = new LocationModel();
+        // $db = $locationModel->set_connection($request->dist_code);
+        // $locationModel->beginTransaction();
+
+        // $subdivs = $locationModel->getSubdivs($db, $request->dist_code);
+
+        // $locationModel->commitTransaction();
+
+        // return response()->json([
+        //     'data' => [
+        //         'status' => 200,
+        //         'msg' => 'Successfully Retrieved Data!',
+        //         'data' => $subdivs
+        //     ]
+        // ], 200);
+    }
+
+    function test($data, $exit=1)  {
+        
+        $exit && exit('<pre>'.print_r($data,1).'</pre>');
+        return '<pre>'.print_r($data,1).'</pre>';
     }
 
 }
