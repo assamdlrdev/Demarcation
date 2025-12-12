@@ -123,22 +123,6 @@ class LocationController extends Controller {
         return response()->json([
             'data' => $response
         ], 200);
-
-        // $locationModel = new LocationModel();
-        // $db = $locationModel->set_connection($request->dist_code);
-        // $locationModel->beginTransaction();
-
-        // $circles = $locationModel->getCircles($db, $request->dist_code);
-
-        // $locationModel->commitTransaction();
-
-        // return response()->json([
-        //     'data' => [
-        //         'status' => 200,
-        //         'msg' => 'Successfully Retrieved Data!',
-        //         'data' => $circles
-        //     ]
-        // ], 200);
     }
 
     public function getMouzas(Request $request) {

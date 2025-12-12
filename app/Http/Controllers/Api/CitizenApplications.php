@@ -34,7 +34,7 @@ class CitizenApplications extends Controller
             'patta_type_code'       => 'required|string',
             'patta_no'              => 'required|string',
             'land_class_code'       => 'required|string',
-            'land_photo' => 'required|file|max:5120|mimes:jpg,jpeg,png,pdf'
+            'land_photo'            => 'required|file|max:5120|mimes:jpg,jpeg,png,pdf'
         ];
 
         $validator = Validator::make($request->all(), $rules);
