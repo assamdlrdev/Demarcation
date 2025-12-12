@@ -537,7 +537,7 @@ class LocationController extends Controller
         $data['cir_code'] = $request->cir_code;
         $data['mouza_pargona_code'] = $request->mouza_pargona_code; //
         $data['lot_no'] = $request->lot_no;
-        $data['vil_townpart_code'] = $request->vil_townpart_code;
+        $data['vill_townprt_code'] = $request->vill_townprt_code;
         $data['patta_no'] = $request->patta_no;
         $data['patta_type_code'] = $request->patta_type_code;
 
