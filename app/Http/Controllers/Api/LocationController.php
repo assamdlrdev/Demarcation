@@ -16,7 +16,7 @@ class LocationController extends Controller
 
         return response()->json([
             'data' => [
-                'status' => 200,
+                'status' => 'y',
                 'msg' => 'Successfully Retrieved Data!',
                 'data' => $districts
             ]
