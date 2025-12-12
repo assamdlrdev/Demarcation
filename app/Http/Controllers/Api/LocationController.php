@@ -547,7 +547,6 @@ class LocationController extends Controller
         $data['apikey'] = "chithaentry_resurvey";
 
         $api_output = callApi($url, $method, $data);
-        $this->test($api_output); exit;
 
         if ($api_output['status'] != 'y') {
             // log_message("error", 'LAND HUB API FAIL LMController');
