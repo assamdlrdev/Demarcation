@@ -583,6 +583,109 @@ class LocationController extends Controller
         // ], 200);
     }
 
+    public function getEkhajanaReceiptNumber(Request $request){
+        $data['dist_code'] = $request->dist_code;
+        $data['subdiv_code'] = $request->subdiv_code;
+        $data['cir_code'] = $request->cir_code;
+        $data['mouza_pargona_code'] = $request->mouza_pargona_code; //
+        $data['lot_no'] = $request->lot_no;
+        $data['vill_townprt_code'] = $request->vill_townprt_code;
+        $data['patta_no'] = $request->patta_no;
+        $data['patta_type_code'] = $request->patta_type_code;
+
+        $url = "https://basundhara.assam.gov.in/rtpsmb2demo/EkhajanaExternalApi/getEkhajanaReceiptNumber";
+        $method = 'POST';
+
+        $data['apikey'] = "chithaentry_resurvey";
+
+        $api_output = callApi($url, $method, $data);
+
+        // if ($api_output['responseType'] != 2) {
+        //     // log_message("error", 'LAND HUB API FAIL LMController');
+        //     $response = [
+        //         'status' => 'n',
+        //         'msg' => 'API Failed!',
+        //         'error' => $api_output['error_code'],
+        //         'data' => $api_output['data']
+        //     ];
+        //     return response()->json([
+        //         'data' => $response
+        //     ], 500);
+        // }
+
+        $ekhajanaData = json_decode($api_output['data']);
+        if ($ekhajanaData->responseType != 2) {
+            $response = [
+                'status' => 'n',
+                'msg' => $ekhajanaData
+            ];
+            return response()->json([
+                'data' => $response
+            ], 500);
+        }
+
+        $response = [
+            'status' => 'y',
+            'msg' => 'Data successfully retreived!',
+            'data' => $ekhajanaData->data
+        ];
+        return response()->json([
+            'data' => $response
+        ], 200);
+    }
+
+    public function getKhajana(Request $request)
+    {
+        $data['dist_code'] = $request->dist_code;
+        $data['subdiv_code'] = $request->subdiv_code;
+        $data['cir_code'] = $request->cir_code;
+        $data['mouza_pargona_code'] = $request->mouza_pargona_code; //
+        $data['lot_no'] = $request->lot_no;
+        $data['vill_townprt_code'] = $request->vill_townprt_code;
+        $data['patta_no'] = $request->patta_no;
+        $data['patta_type_code'] = $request->patta_type_code;
+        $data['apikey'] = "demarcation_app";
+
+        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getKhajanaAmount";
+        $method = 'POST';
+        $api_output = callApi($url, $method, $data);
+        
+        if ($api_output['status'] != 'y') {
+            // log_message("error", 'LAND HUB API FAIL LMController');
+            $response = [
+                'status' => 'n',
+                'msg' => 'API Failed!',
+                'error' => $api_output['error_code'],
+                'data' => $api_output['data']
+            ];
+            return response()->json([
+                'data' => $response
+            ], 500);
+        }
+
+        $ekjajanaRes = json_decode($api_output['data']);
+
+        if ($ekjajanaRes->responseType != 2) {
+            $response = [
+                'status' => 'n',
+                'msg' => $ekjajanaRes->data
+            ];
+            return response()->json([
+                'data' => $response
+            ], 500);
+        }
+
+        $response = [
+            'status' => 'y',
+            'msg' => 'Data successfully retreived!',
+            'data' => $ekjajanaRes->data
+        ];
+        return response()->json([
+            'data' => $response
+        ], 200);
+
+    }
+
     function test($data, $exit=1)  {
         
         $exit && exit('<pre>'.print_r($data,1).'</pre>');

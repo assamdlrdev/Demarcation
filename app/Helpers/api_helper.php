@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Support\Facades\Log;
 
 function callApi($url, $method, $data = null)
 {
@@ -26,7 +27,26 @@ function callApi($url, $method, $data = null)
     $response = curl_exec($curl);
     $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
+    Log::info("API REQUEST", [
+        'url' => $url,
+        'method' => $method,
+        'headers' => [
+            'Content-Type: application/x-www-form-urlencoded'
+        ],
+        'data' => $data
+    ]);
+
+    // Check if the cURL request was successful or failed
+    if(curl_errno($curl)) {
+        $error_msg = curl_error($curl);
+        Log::error("cURL Error: " . $error_msg);  // Log any cURL errors
+    }
+
     curl_close($curl);
+    Log::info("API RESPONSE: ", [
+        'http_code' => $httpcode,
+        'response' => $response
+    ]);
     
     if ($httpcode != 200) {
         // log_message("error", 'API FAIL');

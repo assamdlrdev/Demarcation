@@ -33,6 +33,14 @@ class CitizenApplications extends Controller
             }
         }
 
+        // return response()->json([
+        //     'data' => [
+        //         'data' => $request->all(),
+        //         'file' => $request->file('land_photo'),
+        //         'status' => 200
+        //     ]
+        // ], 200);
+
         $rules = [
             'dist_code' => 'required|string',
             'subdiv_code' => 'required|string',
@@ -51,8 +59,7 @@ class CitizenApplications extends Controller
             'patta_type_code' => 'required|string',
             'patta_no' => 'required|string',
             'land_class_code' => 'required|string',
-            // 'land_photo' => 'required|file|max:5120|mimes:jpg,jpeg,png,pdf'  //todo
-            'land_photo' => 'nullable|string'  //todo
+            'land_photo' => 'required|file|max:5120|mimes:jpg,jpeg,png,pdf'
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -139,11 +146,11 @@ class CitizenApplications extends Controller
                                 'lot_no' => $request->lot_no,
                                 'vill_townprt_code' => $request->vill_townprt_code
                             ];
-                            // $uploadResponse = $this->uploadAttachment($dataForUpload);
-                            // if ($uploadResponse->getStatusCode() != 200) {
-                            //     DB::rollback();
-                            //     return $uploadResponse;
-                            // }
+                            $uploadResponse = $this->uploadAttachment($dataForUpload);
+                            if ($uploadResponse->getStatusCode() != 200) {
+                                DB::rollback();
+                                return $uploadResponse;
+                            }
 
                             DB::commit();
                             return response()->json([
