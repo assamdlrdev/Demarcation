@@ -298,6 +298,15 @@ class CitizenApplications extends Controller
 
     private function attachLocationNames($application)
     {
+        $application->dist_name = Location::where([
+            'dist_code' => $application->dist_code,
+            'subdiv_code' => '00',
+            'cir_code' => '00',
+            'mouza_pargona_code' => '00',
+            'vill_townprt_code' => '00000',
+            'lot_no' => '00',
+        ])->value('loc_name');
+
         $application->subdiv_name = Location::where([
             'dist_code' => $application->dist_code,
             'subdiv_code' => $application->subdiv_code,
