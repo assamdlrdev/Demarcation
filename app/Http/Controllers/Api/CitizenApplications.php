@@ -250,4 +250,45 @@ class CitizenApplications extends Controller
         }
 
     }
+
+    /**
+     * Get application details by application number.
+     */
+
+    public function getApplicatonDetails(Request $request)
+    {
+        $rules = [
+            'application_no' => 'required|string',
+        ];  
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->passes()) {
+            $application = CitizenApplication::with('attachment', 'demarcationdagareas')->where('application_no', $request->application_no)->first();
+            if ($application) {
+                return response()->json([
+                    'data' => [
+                        'message' => 'Application details retrieved successfully.',
+                        'status' => 200,
+                        'application' => $application
+                    ]
+                ], 200);
+            } else {
+                return response()->json([
+                    'data' => [
+                        'message' => 'Application not found.',
+                        'status' => 404
+                    ]
+                ], 404);
+            }
+        } else {
+            return response()->json([
+                'data' => [
+                    'status' => 500,
+                    'errors' => $validator->errors()
+                ]
+            ], 500);
+        }
+    }
+
 }
