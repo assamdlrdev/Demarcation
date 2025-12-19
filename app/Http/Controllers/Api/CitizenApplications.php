@@ -110,6 +110,7 @@ class CitizenApplications extends Controller
                 DB::beginTransaction();
                 try {
                     $citizenApplication = new CitizenApplication();
+                    $app_no = "D".time();
 
                     $citizenApplication->dist_code = $request->dist_code;
                     $citizenApplication->subdiv_code = $request->subdiv_code;
@@ -118,7 +119,7 @@ class CitizenApplications extends Controller
                     $citizenApplication->lot_no = $request->lot_no;
                     $citizenApplication->vill_townprt_code = $request->vill_townprt_code;
 
-                    $citizenApplication->application_no = time();
+                    $citizenApplication->application_no = $app_no;
 
                     if ($citizenApplication->save()) {
                         $demarcationDagArea = new DemarcationDagArea();
@@ -155,6 +156,7 @@ class CitizenApplications extends Controller
                             DB::commit();
                             return response()->json([
                                 'data' => [
+                                    'app_no' => $app_no,
                                     'message' => 'Your request has been submitted successfully.',
                                     'status' => 200
                                 ]
