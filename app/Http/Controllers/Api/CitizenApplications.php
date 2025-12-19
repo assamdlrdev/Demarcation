@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\CitizenApplication;
 use App\Models\DemarcationDagArea;
 use App\Models\Attachments;
+use App\Models\Location;
 
 class CitizenApplications extends Controller
 {
@@ -268,6 +269,7 @@ class CitizenApplications extends Controller
         if ($validator->passes()) {
             $application = CitizenApplication::with('attachment', 'demarcationdagareas')->where('application_no', $request->application_no)->first();
             if ($application) {
+                $application = $this->attachLocationNames($application);
                 return response()->json([
                     'data' => [
                         'message' => 'Application details retrieved successfully.',
@@ -292,5 +294,56 @@ class CitizenApplications extends Controller
             ], 500);
         }
     }
+
+    private function attachLocationNames($application)
+    {
+        $application->subdiv_name = Location::where([
+            'dist_code' => $application->dist_code,
+            'subdiv_code' => $application->subdiv_code,
+            'cir_code' => '00',
+            'mouza_pargona_code' => '00',
+            'vill_townprt_code' => '00000',
+            'lot_no' => '00',
+        ])->value('loc_name');
+
+        $application->cir_name = Location::where([
+            'dist_code' => $application->dist_code,
+            'subdiv_code' => $application->subdiv_code,
+            'cir_code' => $application->cir_code,
+            'mouza_pargona_code' => '00',
+            'vill_townprt_code' => '00000',
+            'lot_no' => '00',
+        ])->value('loc_name');
+
+        $application->mouza_name = Location::where([
+            'dist_code' => $application->dist_code,
+            'subdiv_code' => $application->subdiv_code,
+            'cir_code' => $application->cir_code,
+            'mouza_pargona_code' => $application->mouza_pargona_code,
+            'vill_townprt_code' => '00000',
+            'lot_no' => '00',
+        ])->value('loc_name');
+
+        $application->lot_name = Location::where([
+            'dist_code' => $application->dist_code,
+            'subdiv_code' => $application->subdiv_code,
+            'cir_code' => $application->cir_code,
+            'mouza_pargona_code' => $application->mouza_pargona_code,
+            'lot_no' => $application->lot_no,
+            'vill_townprt_code' => '00000',
+        ])->value('loc_name');
+
+        $application->vill_name = Location::where([
+            'dist_code' => $application->dist_code,
+            'subdiv_code' => $application->subdiv_code,
+            'cir_code' => $application->cir_code,
+            'mouza_pargona_code' => $application->mouza_pargona_code,
+            'lot_no' => $application->lot_no,
+            'vill_townprt_code' => $application->vill_townprt_code,
+        ])->value('loc_name');
+
+        return $application;
+    }
+
 
 }
