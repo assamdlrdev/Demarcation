@@ -127,6 +127,7 @@ class CitizenApplications extends Controller
 
                         $demarcationDagArea->citizen_application_id = $citizenApplication->id;
                         $demarcationDagArea->pattadar_id = $request->pattadar_id;
+                        $demarcationDagArea->pattadar_name = $request->pattadar_name; //remove this line later
                         $demarcationDagArea->dag_no = $request->dag_no;
                         $demarcationDagArea->dag_area_b = $request->dag_area_b;
                         $demarcationDagArea->dag_area_k = $request->dag_area_k;
