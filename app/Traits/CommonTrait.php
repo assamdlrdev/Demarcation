@@ -8,34 +8,37 @@ trait CommonTrait
 {
     //
 
-    protected $district;
+    
+    
 
-    public function set_connection($dist_code = null) {
-        $this->setDistrict($dist_code);
-        return $this->dbswitch();
+
+    
+
+    // public function beginTransaction() {
+    //     $connection = $this->switchConnection();
+    //     return DB::connection($connection)->beginTransaction();
+    // }
+
+    // public function rollbackTransaction() {
+    //     $connection = $this->switchConnection();
+    //     return DB::connection($connection)->rollBack();
+    // }
+
+    // public function commitTransaction() {
+    //     $connection = $this->switchConnection();
+    //     DB::connection($connection)->commit();
+    // }
+
+    // private function setDistrict($district) {
+    //     $this->district = $district;
+    // }
+
+    public function dbswitch($dist_code) {
+        return $this->switchConnection($dist_code);
     }
 
-    public function beginTransaction() {
-        $connection = $this->switchConnection();
-        return DB::connection($connection)->beginTransaction();
-    }
-
-    public function rollbackTransaction() {
-        $connection = $this->switchConnection();
-        return DB::connection($connection)->rollBack();
-    }
-
-    public function commitTransaction() {
-        $connection = $this->switchConnection();
-        DB::connection($connection)->commit();
-    }
-
-    private function setDistrict($district) {
-        $this->district = $district;
-    }
-
-    private function switchConnection() {
-        switch ($this->district) {
+    public function switchConnection($dist_code) {
+        switch ($dist_code) {
             case '17':
                 $connection = 'pgsql_dibrugarh';
                 break;
@@ -132,10 +135,9 @@ trait CommonTrait
         return $connection;
     }
 
-    private function dbswitch()
-    {
-        $connection = $this->switchConnection();
-        return $this->setConnection($connection)->newQuery();
-    }
+    // private function dbswitch($dist_code)
+    // {
+    //     return $this->switchConnection($dist_code);   
+    // }
 
 }

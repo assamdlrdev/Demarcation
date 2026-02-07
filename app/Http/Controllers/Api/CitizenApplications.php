@@ -10,6 +10,7 @@ use App\Models\CitizenApplication;
 use App\Models\DemarcationDagArea;
 use App\Models\Attachments;
 use App\Models\Location;
+use App\Models\LocationModel;
 
 class CitizenApplications extends Controller
 {
@@ -296,61 +297,165 @@ class CitizenApplications extends Controller
         }
     }
 
+    public function editApplication(Request $request) {
+        $rules = [
+            'application_no' => 'required|string',
+            'dag_area_b' => 'required',
+            'dag_area_k' => 'required',
+            'dag_area_lc' => 'required'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if(!$validator->passes()) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Input Validation Failed ' . json_encode($validator->errors()),
+                    'status' => 500,
+                    'errors' => $validator->errors()
+                ]
+            ], 500);
+        }
+        DB::beginTransaction();
+        try {
+            $citizenApplication = CitizenApplication::where('application_no', $request->application_no)->first();
+            if(empty($citizenApplication)) {
+                DB::rollBack();
+                return response()->json([
+                    'data' => [
+                        'message' => 'Application could not be found!',
+                        'status' => 500,
+                        'errors' => 'Application could not be found!'
+                    ]
+                ], 500);
+            }
+            $response = DemarcationDagArea::where('citizen_application_id', $citizenApplication->id)
+            ->update([
+                'app_dag_area_b' => $request->dag_area_b,
+                'app_dag_area_k' => $request->dag_area_k,
+                'app_dag_area_lc' => $request->dag_area_lc
+            ]);
+            if($response != 1) {
+                DB::rollBack();
+                return response()->json([
+                    'data' => [
+                        'message' => 'Could Not Update!',
+                        'status' => 500,
+                        'errors' => 'Could Not Update!'
+                    ]
+                ], 500);
+            }
+            DB::commit();
+            return response()->json([
+                'data' => [
+                    'message' => 'Successfully Updated Application!',
+                    'status' => 200,
+                    'errors' => '',
+                    'data' => $response,
+
+                ]
+            ], 200);
+        }
+        catch(\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'data' => [
+                    'message' => 'Error in execution! ' . $e->getMessage(),
+                    'status' => 500,
+                    'errors' => $e->getMessage()
+                ]
+            ], 500);
+        }
+    }
+
+    public function finalSubmitApplication(Request $request) {
+        $rules = [
+            'application_no' => 'required|string',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if(!$validator->passes()) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Input Validation Failed ' . json_encode($validator->errors()),
+                    'status' => 500,
+                    'errors' => $validator->errors()
+                ]
+            ], 500);
+        }
+
+        DB::beginTransaction();
+        try {
+            $citizenApplication = CitizenApplication::where('application_no', $request->application_no)->first();
+            if(empty($citizenApplication)) {
+                DB::rollBack();
+                return response()->json([
+                    'data' => [
+                        'message' => 'Application could not be found!',
+                        'status' => 500,
+                        'errors' => 'Application could not be found!'
+                    ]
+                ], 500);
+            }
+
+            $response = CitizenApplication::where('application_no', $request->application_no)->update([
+                'final_submit' => 1
+            ]);
+
+            if($response != 1) {
+                DB::rollBack();
+                return response()->json([
+                    'data' => [
+                        'message' => 'Could Not Update!',
+                        'status' => 500,
+                        'errors' => 'Could Not Update!'
+                    ]
+                ], 500);
+            }
+
+            DB::commit(); 
+
+            return response()->json([
+                'data' => [
+                    'message' => 'Successfully Updated Apllication!',
+                    'status' => 200,
+                    'errors' => '',
+                    'data' => $response,
+
+                ]
+            ], 200);       
+        }
+        catch(\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'data' => [
+                    'message' => 'Error in execution! ' . $e->getMessage(),
+                    'status' => 500,
+                    'errors' => $e->getMessage()
+                ]
+            ], 500);
+        }
+    }
+
     private function attachLocationNames($application)
     {
-        $application->dist_name = Location::where([
-            'dist_code' => $application->dist_code,
-            'subdiv_code' => '00',
-            'cir_code' => '00',
-            'mouza_pargona_code' => '00',
-            'vill_townprt_code' => '00000',
-            'lot_no' => '00',
-        ])->value('loc_name');
+        $locationModel = new LocationModel();
+        
+        $locationModel->connection = $locationModel->dbswitch($application->dist_code);
+        
 
-        $application->subdiv_name = Location::where([
-            'dist_code' => $application->dist_code,
-            'subdiv_code' => $application->subdiv_code,
-            'cir_code' => '00',
-            'mouza_pargona_code' => '00',
-            'vill_townprt_code' => '00000',
-            'lot_no' => '00',
-        ])->value('loc_name');
+        $locationDetails = $locationModel->getLocationNames($application->dist_code, $application->subdiv_code, $application->cir_code, $application->mouza_pargona_code, $application->lot_no, $application->vill_townprt_code);
+       
+        // $locationModel->commitTransaction();
 
-        $application->cir_name = Location::where([
-            'dist_code' => $application->dist_code,
-            'subdiv_code' => $application->subdiv_code,
-            'cir_code' => $application->cir_code,
-            'mouza_pargona_code' => '00',
-            'vill_townprt_code' => '00000',
-            'lot_no' => '00',
-        ])->value('loc_name');
+        $application->dist_name = $locationDetails['dist_name'];
+        $application->subdiv_name = $locationDetails['subdiv_name'];
+        $application->cir_name = $locationDetails['cir_name'];
+        $application->mouza_name = $locationDetails['mouza_name'];
+        $application->lot_name = $locationDetails['lot_name'];
+        $application->vill_name = $locationDetails['vill_name'];
 
-        $application->mouza_name = Location::where([
-            'dist_code' => $application->dist_code,
-            'subdiv_code' => $application->subdiv_code,
-            'cir_code' => $application->cir_code,
-            'mouza_pargona_code' => $application->mouza_pargona_code,
-            'vill_townprt_code' => '00000',
-            'lot_no' => '00',
-        ])->value('loc_name');
-
-        $application->lot_name = Location::where([
-            'dist_code' => $application->dist_code,
-            'subdiv_code' => $application->subdiv_code,
-            'cir_code' => $application->cir_code,
-            'mouza_pargona_code' => $application->mouza_pargona_code,
-            'lot_no' => $application->lot_no,
-            'vill_townprt_code' => '00000',
-        ])->value('loc_name');
-
-        $application->vill_name = Location::where([
-            'dist_code' => $application->dist_code,
-            'subdiv_code' => $application->subdiv_code,
-            'cir_code' => $application->cir_code,
-            'mouza_pargona_code' => $application->mouza_pargona_code,
-            'lot_no' => $application->lot_no,
-            'vill_townprt_code' => $application->vill_townprt_code,
-        ])->value('loc_name');
+        
 
         return $application;
     }

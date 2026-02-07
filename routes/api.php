@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('store-application', [App\Http\Controllers\Api\CitizenApplications::class, 'store']);
 Route::post('get-application-details', [App\Http\Controllers\Api\CitizenApplications::class, 'getApplicatonDetails']);
-
+Route::post('edit-application', [App\Http\Controllers\Api\CitizenApplications::class, 'editApplication']);
+Route::post('final-submit-application', [App\Http\Controllers\Api\CitizenApplications::class, 'finalSubmitApplication']);
 
 // Route::middleware('jwt')->group(function () {
 Route::post('get-districts', [App\Http\Controllers\Api\LocationController::class, 'getDistricts']);
