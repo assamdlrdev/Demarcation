@@ -33,7 +33,7 @@ trait CommonTrait
     //     $this->district = $district;
     // }
 
-    public function dbswitch($dist_code) {
+    public function dbswitch($dist_code = null) {
         return $this->switchConnection($dist_code);
     }
 
@@ -130,7 +130,7 @@ trait CommonTrait
                 $connection = 'pgsql_tinsukia';
                 break;
             default:
-                $connection = 'pgsql';
+                $connection = 'pgsql_default';
         }
         return $connection;
     }

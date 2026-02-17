@@ -8,5 +8,6 @@ return [
         '25' => 'ধেমাজি'
     ],
     'LANDHUB_BASE_URL' => 'https://landhub.assam.gov.in/apidemo/index.php/',
-    'APP_FOLDER_NAME'  =>  "demarcation/"
+    'APP_FOLDER_NAME'  =>  "demarcation/",
+    'SINGLESIGN_LINK' => "http://localhost/singlesignResurvey/index.php"
 ];
