@@ -129,6 +129,9 @@ trait CommonTrait
             case '18':
                 $connection = 'pgsql_tinsukia';
                 break;
+            case 'demarcation':
+                $connection = 'pgsql';
+                break;
             default:
                 $connection = 'pgsql_default';
         }

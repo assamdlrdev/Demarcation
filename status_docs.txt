@@ -1,0 +1,4 @@
+DEMARCATION STATUSES
+
+"Q" -> "Application Stage"
+"A" -> "LRA Stage"

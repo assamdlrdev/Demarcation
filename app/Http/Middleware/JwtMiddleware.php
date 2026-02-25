@@ -19,7 +19,7 @@ class JwtMiddleware
         $token = $request->bearerToken();
         if(!$token) {
             return response()->json([
-                'status' => 1,
+                'status' => 'n',
                 'msg' => 'Token missing!'
             ], 401);
         }
@@ -27,7 +27,7 @@ class JwtMiddleware
         $decodedToken = jwtdecode($token);
         if(!$decodedToken) {
             return response()->json([
-                'status' => 1,
+                'status' => 'n',
                 'msg' => 'Invalid or expired!'
             ], 401);
         }

@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
         $middleware->prepend(\App\Http\Middleware\DisableXmlCsrf::class);
+        // $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
+        // $middleware->validateCsrfTokens(except: [
+        //     // ...
+        // ]);
         
         $middleware->web(append: [
             HandleAppearance::class,

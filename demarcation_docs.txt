@@ -1,0 +1,158 @@
+ALTER TABLE citizen_applications ADD COLUMN final_submit integer NOT NULL DEFAULT 0
+
+
+-- Table: public.demarcation_villages
+-- DROP TABLE IF EXISTS public.demarcation_villages;
+CREATE TABLE IF NOT EXISTS public.demarcation_villages
+(
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
+    dist_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    subdiv_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    cir_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    mouza_pargona_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    lot_no character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    vill_townprt_code character varying(5) COLLATE pg_catalog."default" NOT NULL,
+    user_code character varying(5) COLLATE pg_catalog."default",
+    is_merged integer NOT NULL DEFAULT 0,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    CONSTRAINT demarcation_villages_pkey PRIMARY KEY (dist_code, subdiv_code, cir_code, mouza_pargona_code, lot_no, vill_townprt_code)
+)
+TABLESPACE pg_default;
+ALTER TABLE IF EXISTS public.demarcation_villages
+    OWNER to postgres;
+
+
+
+-- Table: public.demarcation_basic
+-- DROP TABLE IF EXISTS public.demarcation_basic;
+CREATE TABLE IF NOT EXISTS public.demarcation_basic
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    dist_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    subdiv_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    cir_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    mouza_pargona_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    lot_no character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    vill_townprt_code character varying(5) COLLATE pg_catalog."default" NOT NULL,
+    application_no character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    aadhaar_verified character varying(1) COLLATE pg_catalog."default",
+    status character varying(2) COLLATE pg_catalog."default",
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    user_code character varying(5) COLLATE pg_catalog."default",
+    user_desig_code character varying(5) COLLATE pg_catalog."default",
+    CONSTRAINT demarcation_basic_pkey PRIMARY KEY (dist_code, subdiv_code, cir_code, mouza_pargona_code, lot_no, vill_townprt_code, application_no)
+)
+TABLESPACE pg_default;
+ALTER TABLE IF EXISTS public.demarcation_basic
+    OWNER to postgres;
+
+
+-- Table: public.demarcation_dag_details
+-- DROP TABLE IF EXISTS public.demarcation_dag_details;
+CREATE TABLE IF NOT EXISTS public.demarcation_dag_details
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    demarcation_basic_id integer,
+    dist_code character varying(2) COLLATE pg_catalog."default",
+    subdiv_code character varying(2) COLLATE pg_catalog."default",
+    cir_code character varying(2) COLLATE pg_catalog."default",
+    mouza_pargona_code character varying(2) COLLATE pg_catalog."default",
+    lot_no character varying(2) COLLATE pg_catalog."default",
+    vill_townprt_code character varying(5) COLLATE pg_catalog."default",
+    dag_no character varying(12) COLLATE pg_catalog."default",
+    patta_no character varying(20) COLLATE pg_catalog."default",
+    patta_type_code character varying(4) COLLATE pg_catalog."default",
+    land_class_code character varying(4) COLLATE pg_catalog."default",
+    dag_area_b numeric,
+    dag_area_k numeric,
+    dag_area_lc numeric,
+    dag_area_g numeric,
+    app_dag_area_b numeric,
+    app_dag_area_k numeric,
+    app_dag_area_lc numeric,
+    app_dag_area_g numeric,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+)
+TABLESPACE pg_default;
+ALTER TABLE IF EXISTS public.demarcation_dag_details
+    OWNER to postgres;
+
+
+
+-- Table: public.demarcation_applicants
+-- DROP TABLE IF EXISTS public.demarcation_applicants;
+CREATE TABLE IF NOT EXISTS public.demarcation_applicants
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    demarcation_basic_id integer,
+    dist_code character varying(2) COLLATE pg_catalog."default",
+    subdiv_code character varying(2) COLLATE pg_catalog."default",
+    cir_code character varying(2) COLLATE pg_catalog."default",
+    mouza_pargona_code character varying(2) COLLATE pg_catalog."default",
+    lot_no character varying(2) COLLATE pg_catalog."default",
+    vill_townprt_code character varying(5) COLLATE pg_catalog."default",
+    dag_no character varying(12) COLLATE pg_catalog."default",
+    patta_no character varying(20) COLLATE pg_catalog."default",
+    patta_type_code character varying(4) COLLATE pg_catalog."default",
+    pdar_id smallint,
+    pdar_name character varying(200) COLLATE pg_catalog."default",
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    mobile_no character varying(10) COLLATE pg_catalog."default",
+    address text COLLATE pg_catalog."default"
+)
+TABLESPACE pg_default;
+ALTER TABLE IF EXISTS public.demarcation_applicants
+    OWNER to postgres;
+
+
+-- Table: public.demarcation_pattadars
+-- DROP TABLE IF EXISTS public.demarcation_pattadars;
+CREATE TABLE IF NOT EXISTS public.demarcation_pattadars
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    demarcation_basic_id integer,
+    dist_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    subdiv_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    cir_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    mouza_pargona_code character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    lot_no character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    vill_townprt_code character varying(5) COLLATE pg_catalog."default" NOT NULL,
+    dag_no character varying(12) COLLATE pg_catalog."default" NOT NULL,
+    patta_no character varying(20) COLLATE pg_catalog."default" NOT NULL,
+    patta_type_code character varying(4) COLLATE pg_catalog."default" NOT NULL,
+    pdar_id smallint NOT NULL,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    mobile_no character varying(10) COLLATE pg_catalog."default",
+    address text COLLATE pg_catalog."default",
+    CONSTRAINT demarcation_pattadars_pkey PRIMARY KEY (dist_code, subdiv_code, cir_code, mouza_pargona_code, lot_no, vill_townprt_code, dag_no, patta_no, patta_type_code, pdar_id)
+)
+TABLESPACE pg_default;
+ALTER TABLE IF EXISTS public.demarcation_pattadars
+    OWNER to postgres;
+
+
+-- Table: public.demarcation_proceeding
+-- DROP TABLE IF EXISTS public.demarcation_proceeding;
+CREATE TABLE IF NOT EXISTS public.demarcation_proceeding
+(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    proceeding_id integer,
+    dist_code character varying(2) COLLATE pg_catalog."default",
+    subdiv_code character varying(2) COLLATE pg_catalog."default",
+    cir_code character varying(2) COLLATE pg_catalog."default",
+    mouza_pargona_code character varying(2) COLLATE pg_catalog."default",
+    lot_no character varying(2) COLLATE pg_catalog."default",
+    application_no character varying(50) COLLATE pg_catalog."default",
+    user_code character varying(5) COLLATE pg_catalog."default",
+    user_desig_code character varying(5) COLLATE pg_catalog."default",
+    remarks text COLLATE pg_catalog."default"
+)
+TABLESPACE pg_default;
+ALTER TABLE IF EXISTS public.demarcation_proceeding
+    OWNER to postgres;
+
