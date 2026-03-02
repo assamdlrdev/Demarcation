@@ -27,7 +27,7 @@ class LmController extends Controller
 
         $getFinalApplications = $lmModel->getFinalApplications($dist_code, $subdiv_code, $cir_code, $mouza_pargona_code, $lot_no);
 
-        if(empty($getFinalApplications)) {
+        if($getFinalApplications->isEmpty()) {
             return response()->json([
                 'status' => 'n',
                 'msg' => 'No Application Found!'
