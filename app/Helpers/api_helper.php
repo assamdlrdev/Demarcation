@@ -103,3 +103,122 @@ function callLandhubAPIMerge($method, $url, $data)
     curl_close($curl);
     return json_decode($response);
 }
+
+function callLandhubAPIWithHeader($method, $url, $data)
+{
+    $header = ['alg' => 'HS256', 'typ' => 'JWT'];
+    $payload = [
+        'sub' => 'API_Call',
+        'iat' => 1516239022,
+        'exp' => time() + 900
+    ];
+    // $key = 'olkhnmnbgfdsaqwertgnjjmlgpvdhdfagsjsdfqwaspojwqaxsplnbdlydrnvfi'; // shared secret
+    $key = 'qwdstg56r67t76r56r57yhbds826gfssdcuhkhwefg34fvbgbkjhgtsdchnyn';
+
+    $base64UrlHeader = rtrim(strtr(base64_encode(json_encode($header)), '+/', '-_'), '=');
+    $base64UrlPayload = rtrim(strtr(base64_encode(json_encode($payload)), '+/', '-_'), '=');
+    $signature = hash_hmac('sha256', "$base64UrlHeader.$base64UrlPayload", $key, true);
+    $base64UrlSignature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
+
+    $token = "$base64UrlHeader.$base64UrlPayload.$base64UrlSignature";
+
+    $curl = curl_init();
+    $jsonData = json_encode($data);
+
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => config('constants.LANDHUB_BASE_URL_NEW') . $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST =>  true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        // CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_CUSTOMREQUEST => $method,
+        CURLOPT_SSL_VERIFYHOST => 2,
+        CURLOPT_POSTFIELDS => $jsonData,
+        CURLOPT_HTTPHEADER => array(
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($jsonData),
+            'Authorization: Bearer ' . $token
+        ),
+    ));
+
+    $response = curl_exec($curl);
+    $resp = [];
+    if (curl_errno($curl)) {
+        $resp = [
+            'error' => curl_error($curl),
+            'http_status' => curl_getinfo($curl, CURLINFO_HTTP_CODE),
+            'data' => ''
+        ];
+    } else {
+        $resp = [
+            'error' => '',
+            'http_status' => curl_getinfo($curl, CURLINFO_HTTP_CODE),
+            'data' => $response
+        ];
+    }
+    curl_close($curl);
+    return $resp;
+}
+
+function callApiMap($url, $data = null, $method = 'POST', $extraHeaders = [])
+{
+    $curl = curl_init();
+
+    // Default headers
+    $headers = [
+        'Content-Type: application/json',
+        'Accept: application/json'
+    ];
+
+    // Merge with any extra headers you pass
+    if (!empty($extraHeaders)) {
+        $headers = array_merge($headers, $extraHeaders);
+    }
+
+    $options = [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => strtoupper($method),
+        CURLOPT_HTTPHEADER => $headers,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => 2,
+    ];
+
+    if (!empty($data)) {
+        // Ensure it's JSON
+        if (is_array($data)) {
+            $data = json_encode($data, JSON_UNESCAPED_SLASHES);
+        }
+        $options[CURLOPT_POSTFIELDS] = $data;
+    }
+
+    curl_setopt_array($curl, $options);
+
+    $response = curl_exec($curl);
+    $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+    if (curl_errno($curl)) {
+        // log_message("error", 'cURL Error: ' . curl_error($curl));
+        curl_close($curl);
+        return false;
+    }
+
+    curl_close($curl);
+
+    if ($httpcode < 200 || $httpcode >= 300) {
+        // log_message("error", "API FAIL ({$httpcode}): " . $response);
+        return false;
+    }
+
+    return $response;
+}

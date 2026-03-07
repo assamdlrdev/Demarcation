@@ -12,7 +12,9 @@ Route::post('singlesign_login', [App\Http\Controllers\Api\LoginController::class
 Route::post('get_final_applications', [App\Http\Controllers\Api\lm\LmController::class, 'getFinalApplications'])->middleware('jwt');
 Route::post('get_specified_application', [App\Http\Controllers\Api\lm\LmController::class, 'getSpecifiedApplication'])->middleware('jwt');
 Route::post('submit_lm_first', [App\Http\Controllers\Api\lm\LmController::class, 'submitLmFirstProceeding'])->middleware('jwt');
-Route::post('get_co_first_cases', [App\Http\Controllers\Api\co\CoController::class, 'getCoFirstCases']);
+Route::post('get_co_first_cases', [App\Http\Controllers\Api\co\CoController::class, 'getCoFirstCases'])->middleware('jwt');
+Route::post('get_co_specified_application', [App\Http\Controllers\Api\co\CoController::class, 'getCoSpecifiedApplication'])->middleware('jwt');
+Route::post('get_map', [App\Http\Controllers\Api\co\CoController::class, 'getMap'])->middleware('jwt');
 
 // Route::middleware('jwt')->group(function () {
 Route::post('get-districts', [App\Http\Controllers\Api\LocationController::class, 'getDistricts']);
