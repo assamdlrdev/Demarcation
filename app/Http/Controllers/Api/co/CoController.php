@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CoModel;
 use App\Models\LocationModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CoController extends Controller
 {
@@ -43,7 +44,8 @@ class CoController extends Controller
             // $finalApplication->location = $locations;
             $finalApplication->serial_no = ++$serial;
             $finalApplication->village = $locations['dist_name'] . ' district, ' . $locations['subdiv_name'] . ' subdivision, ' . $locations['cir_name'] . ' circle, ' . $locations['mouza_name'] . ' mouza, ' . $locations['lot_name'] . ' lot, ' . $locations['vill_name'] . ' village';
-            $finalApplication->status = 'Active';
+            $finalApplication->status = $finalApplication->status;
+            $finalApplication->status_name = $finalApplication->status == 'A' ? 'Pending' : ($finalApplication->status == 'B' ? 'Notice Issued' : '');
             $finalApplication->action = $finalApplication->dist_code . '-' . $finalApplication->subdiv_code . '-' . $finalApplication->cir_code . '-' . $finalApplication->mouza_pargona_code . '-' . $finalApplication->lot_no . '-' . $finalApplication->vill_townprt_code . '-' . $finalApplication->application_no;
         }
 
@@ -99,6 +101,7 @@ class CoController extends Controller
             }
             $respData = $resp->data;
             
+            $app->patta_type_name = $coModel->pattaTypeName($app->patta_type_code);
             $applicants = $coModel->getApplicants($app->id);
             $pattadars = $coModel->getPattadars($app->id);
 
@@ -169,5 +172,57 @@ class CoController extends Controller
             'msg' => 'Successfully retrieved Map!',
             'data' => $map_geojon_decoded
         ], 200);
+    }
+
+    public function issueNotice(Request $request) {
+        $decodedToken = jwtdecode($request->bearerToken());
+        $application_no = $request->application_no;
+        $hearing_date = $request->hearing_date;
+
+        $dist_code = $decodedToken->dcode;
+        $subdiv_code = $decodedToken->subdiv_code;
+        $cir_code = $decodedToken->cir_code;
+        $user_code = $decodedToken->usercode;
+        $user_desig_code = $decodedToken->user_desig_code;
+
+        $coModel = new CoModel();
+
+        $district_connection = $coModel->connection = $coModel->dbswitch($dist_code);
+        $demarcation_connection = $coModel->dbswitch('demarcation');
+
+        DB::connection($district_connection)->beginTransaction();
+        DB::connection($demarcation_connection)->beginTransaction();
+
+        try {
+            $updateApplication = $coModel->updateApplication($dist_code, $subdiv_code, $cir_code, $application_no, $hearing_date, $user_code, $user_desig_code);
+            if ($updateApplication['status'] != 'y') {
+                throw new \Exception($updateApplication['msg'] ?? 'Application update failed');
+            }
+
+            $coModel->connection = $demarcation_connection;
+            $demarcationUpdate = $coModel->demarcationUpdate($dist_code, $subdiv_code, $cir_code, $application_no);
+            if ($demarcationUpdate['status'] != 'y') {
+                throw new \Exception($demarcationUpdate['msg'] ?? 'Demarcation update failed');
+            }
+
+            // Commit both only when both succeed
+            DB::connection($district_connection)->commit();
+            DB::connection($demarcation_connection)->commit();
+
+            return response()->json([
+                'status' => 'y',
+                'msg' => 'Successfully Issued Notice!'
+            ], 200);
+
+        } catch (\Exception $e) {
+            // Rollback both on any failure
+            DB::connection($district_connection)->rollBack();
+            DB::connection($demarcation_connection)->rollBack();
+
+            return response()->json([
+                'status' => 'n',
+                'msg' => $e->getMessage()
+            ], 500);
+        }
     }
 }

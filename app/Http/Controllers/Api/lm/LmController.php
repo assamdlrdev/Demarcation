@@ -43,7 +43,7 @@ class LmController extends Controller
             // $finalApplication->location = $locations;
             $finalApplication->serial_no = ++$serial;
             $finalApplication->village = $locations['dist_name'] . ' district, ' . $locations['subdiv_name'] . ' subdivision, ' . $locations['cir_name'] . ' circle, ' . $locations['mouza_name'] . ' mouza, ' . $locations['lot_name'] . ' lot, ' . $locations['vill_name'] . ' village';
-            $finalApplication->status = 'Active';
+            $finalApplication->status_name = $finalApplication->status == 'Q' ? 'Pending' : '';
             $finalApplication->action = $finalApplication->dist_code . '-' . $finalApplication->subdiv_code . '-' . $finalApplication->cir_code . '-' . $finalApplication->mouza_pargona_code . '-' . $finalApplication->lot_no . '-' . $finalApplication->vill_townprt_code . '-' . $finalApplication->application_no;
         }
 

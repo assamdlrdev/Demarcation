@@ -34,7 +34,7 @@ class LmModel extends Model {
         ->where('ca.lot_no', $lot_no)
         ->where('ca.final_submit', 1)
         ->where('ca.status', 'Q')
-        ->get(['ca.application_no', 'ca.dist_code', 'ca.subdiv_code', 'ca.cir_code', 'ca.mouza_pargona_code', 'ca.lot_no', 'ca.vill_townprt_code', 'ca.aadhaar_verified', 'ca.created_at']);
+        ->get(['ca.application_no', 'ca.dist_code', 'ca.subdiv_code', 'ca.cir_code', 'ca.mouza_pargona_code', 'ca.lot_no', 'ca.vill_townprt_code', 'ca.aadhaar_verified', 'ca.created_at', 'ca.status']);
 
         return $applications;
     }
@@ -366,7 +366,7 @@ class LmModel extends Model {
             if(!$insertStatus) {
                 return [
                     'status' => 'n',
-                    'msg' => 'Error in creting proceeding log!'
+                    'msg' => 'Error in creating proceeding log!'
                 ];
             }
         }
