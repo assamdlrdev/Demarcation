@@ -2,3 +2,5 @@ DEMARCATION STATUSES
 
 "Q" -> "Application Stage"
 "A" -> "LRA Stage"
+"B" -> "Issued Notice"
+"C" -> "Sent for field verification to LRA"

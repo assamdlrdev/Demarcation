@@ -1,8 +1,31 @@
 <?php
 use Illuminate\Support\Facades\Log;
 
+function tokenize($pvtKey, $expTime) {
+    $header = ['alg' => 'HS256', 'typ' => 'JWT'];
+    $payload = [
+        'sub' => 'API_Call',
+        'iat' => 1516239022,
+        'exp' => time() + $expTime
+    ];
+    // $key = 'olkhnmnbgfdsaqwertgnjjmlgpvdhdfagsjsdfqwaspojwqaxsplnbdlydrnvfi'; // shared secret
+    $key = $pvtKey;
+
+    $base64UrlHeader = rtrim(strtr(base64_encode(json_encode($header)), '+/', '-_'), '=');
+    $base64UrlPayload = rtrim(strtr(base64_encode(json_encode($payload)), '+/', '-_'), '=');
+    $signature = hash_hmac('sha256', "$base64UrlHeader.$base64UrlPayload", $key, true);
+    $base64UrlSignature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
+
+    $token = "$base64UrlHeader.$base64UrlPayload.$base64UrlSignature";
+    return $token;
+}
+
 function callApi($url, $method, $data = null)
 {
+    $key = config('constants.LANDHUB_DEMO_PVT_KEY');
+    $expTime = 31536000;
+    $token = tokenize($key, $expTime);
+
     $curl = curl_init();
 
     curl_setopt_array($curl, array(
@@ -19,8 +42,12 @@ function callApi($url, $method, $data = null)
         CURLOPT_SSL_VERIFYHOST => 2,
         CURLOPT_POSTFIELDS => http_build_query($data),
         CURLOPT_VERBOSE => 1,
-        CURLOPT_HTTPHEADER => array(
+        CURLOPT_HTTPHEADER => config('constants.IS_PRODUCTION') == 0 ? array(
             'Content-Type: application/x-www-form-urlencoded',
+            'X-Api-Key: LOC_API',
+            'Authorization: Bearer ' . $token
+        ) : array(
+            'Content-Type: application/x-www-form-urlencoded'
         ),
     ));
 
@@ -106,21 +133,26 @@ function callLandhubAPIMerge($method, $url, $data)
 
 function callLandhubAPIWithHeader($method, $url, $data)
 {
-    $header = ['alg' => 'HS256', 'typ' => 'JWT'];
-    $payload = [
-        'sub' => 'API_Call',
-        'iat' => 1516239022,
-        'exp' => time() + 900
-    ];
-    // $key = 'olkhnmnbgfdsaqwertgnjjmlgpvdhdfagsjsdfqwaspojwqaxsplnbdlydrnvfi'; // shared secret
-    $key = 'qwdstg56r67t76r56r57yhbds826gfssdcuhkhwefg34fvbgbkjhgtsdchnyn';
+    // $header = ['alg' => 'HS256', 'typ' => 'JWT'];
+    // $payload = [
+    //     'sub' => 'API_Call',
+    //     'iat' => 1516239022,
+    //     'exp' => time() + 900
+    // ];
+    // // $key = 'olkhnmnbgfdsaqwertgnjjmlgpvdhdfagsjsdfqwaspojwqaxsplnbdlydrnvfi'; // shared secret
+    // $key = 'qwdstg56r67t76r56r57yhbds826gfssdcuhkhwefg34fvbgbkjhgtsdchnyn';
 
-    $base64UrlHeader = rtrim(strtr(base64_encode(json_encode($header)), '+/', '-_'), '=');
-    $base64UrlPayload = rtrim(strtr(base64_encode(json_encode($payload)), '+/', '-_'), '=');
-    $signature = hash_hmac('sha256', "$base64UrlHeader.$base64UrlPayload", $key, true);
-    $base64UrlSignature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
+    // $base64UrlHeader = rtrim(strtr(base64_encode(json_encode($header)), '+/', '-_'), '=');
+    // $base64UrlPayload = rtrim(strtr(base64_encode(json_encode($payload)), '+/', '-_'), '=');
+    // $signature = hash_hmac('sha256', "$base64UrlHeader.$base64UrlPayload", $key, true);
+    // $base64UrlSignature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
 
-    $token = "$base64UrlHeader.$base64UrlPayload.$base64UrlSignature";
+    // $token = "$base64UrlHeader.$base64UrlPayload.$base64UrlSignature";
+
+    // $key = 'qwdstg56r67t76r56r57yhbds826gfssdcuhkhwefg34fvbgbkjhgtsdchnyn';
+    $key = config('constants.BHUNAKSHA_PRIVATE_KEY');
+    $expTime = 900;
+    $token = tokenize($key, $expTime);
 
     $curl = curl_init();
     $jsonData = json_encode($data);

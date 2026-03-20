@@ -168,14 +168,14 @@ class CoModel extends Model
         return $maxId + 1;
     }
 
-    public function demarcationUpdate($dist_code, $subdiv_code, $cir_code, $application_no) {
+    public function demarcationUpdate($dist_code, $subdiv_code, $cir_code, $application_no, $status) {
         $updateStatus = DB::connection($this->connection)->table("citizen_applications")
         ->where('dist_code', $dist_code)
         ->where('subdiv_code', $subdiv_code)
         ->where('cir_code', $cir_code)
         ->where('application_no', $application_no)
         ->update([
-            'status' => 'B',
+            'status' => $status,
             'updated_at' => date('Y-m-d H:i:s')
         ]);
         if($updateStatus < 1) {
@@ -187,6 +187,82 @@ class CoModel extends Model
         return [
             'status' => 'y',
             'msg' => 'Demarcation Status updated successfully!'
+        ];
+    }
+
+    public function authorizeApplication($dist_code, $subdiv_code, $cir_code, $application_no) {
+        $authorize = DB::connection($this->connection)->table('demarcation_basic')
+        ->where('dist_code', $dist_code)
+        ->where('subdiv_code', $subdiv_code)
+        ->where('cir_code', $cir_code)
+        ->where('application_no', $application_no)
+        ->where('status', 'B')
+        ->exists();
+        if(!$authorize) {
+            return [
+                'status' => 'n',
+                'msg' => 'Not Authorized'
+            ];
+        }
+        return [
+            'status' => 'y',
+            'msg' => 'Authorized'
+        ];
+    }
+
+    public function fieldVerificationOrder($dist_code, $subdiv_code, $cir_code, $application_no, $hearing_date, $user_code, $user_desig_code) {
+        $update = DB::connection($this->connection)->table('demarcation_basic')
+        ->where('dist_code', $dist_code)
+        ->where('subdiv_code', $subdiv_code)
+        ->where('cir_code', $cir_code)
+        ->where('application_no', $application_no)
+        ->update([
+            'status' => 'C',
+            'co_code' => $user_code,
+            'user_desig_code' => $user_desig_code,
+            'hearing_date' => $hearing_date,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        if($update < 1) {
+            return [
+                'status' => 'n',
+                'msg' => 'Application could not be updated!'
+            ];
+        }
+        
+        $applicationData = DB::connection($this->connection)->table('demarcation_basic')
+        ->where('dist_code', $dist_code)
+        ->where('subdiv_code', $subdiv_code)
+        ->where('cir_code', $cir_code)
+        ->where('application_no', $application_no)
+        ->get();
+
+        $proceedingId = $this->getProceedingId($dist_code, $subdiv_code, $cir_code, $applicationData[0]->mouza_pargona_code, $applicationData[0]->lot_no, $application_no);
+        $insertProceeding = DB::connection($this->connection)->table('demarcation_proceeding')
+        ->insert([
+            'proceeding_id' => $proceedingId,
+            'dist_code' => $dist_code,
+            'subdiv_code' => $subdiv_code,
+            'cir_code' => $cir_code,
+            'mouza_pargona_code' => $applicationData[0]->mouza_pargona_code,
+            'lot_no' => $applicationData[0]->lot_no,
+            'application_no' => $application_no,
+            'user_code' => $user_code,
+            'user_desig_code' => $user_desig_code,
+            'remarks' => 'Sent for Field Verification by CO',
+            'hearing_date' => $hearing_date
+        ]);
+        if(!$insertProceeding) {
+            return [
+                'status' => 'n',
+                'msg' => 'Could not update proceeding!'
+            ];
+        }
+
+        return [
+            'status' => 'y',
+            'msg' => 'Successfully Updated application!'
         ];
     }
 }

@@ -27,7 +27,7 @@ class LocationController extends Controller
     {
         $dist_code = $request->dist_code;
         $data = [];
-        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getSubdivs";
+        $url = ((config('constants.IS_PRODUCTION') == 0) ? config('constants.LANDHUB_BASE_URL') : config('constants.LANDHUB_BASE_URL_NEW')) . "NicApi/getSubdivs";
         $method = 'POST';
         $data['dist_code'] = $dist_code;
         $data['apikey'] = "chithaentry_resurvey";
@@ -89,7 +89,7 @@ class LocationController extends Controller
         $dist_code = $request->dist_code;
         $subdiv_code = $request->subdiv_code;
         $data = [];
-        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getCircles";
+        $url = ((config('constants.IS_PRODUCTION') == 0) ? config('constants.LANDHUB_BASE_URL') : config('constants.LANDHUB_BASE_URL_NEW')) . "NicApi/getCircles";
         $method = 'POST';
         $data['dist_code'] = $dist_code;
         $data['subdiv_code'] = $subdiv_code;
@@ -135,7 +135,7 @@ class LocationController extends Controller
         $subdiv_code = $request->subdiv_code;
         $cir_code = $request->cir_code;
         $data = [];
-        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getMouzas";
+        $url = ((config('constants.IS_PRODUCTION') == 0) ? config('constants.LANDHUB_BASE_URL') : config('constants.LANDHUB_BASE_URL_NEW')) . "NicApi/getMouzas";
         $method = 'POST';
         $data['dist_code'] = $dist_code;
         $data['subdiv_code'] = $subdiv_code;
@@ -201,7 +201,7 @@ class LocationController extends Controller
         $cir_code = $request->cir_code;
         $mouza_pargona_code = $request->mouza_pargona_code;
         $data = [];
-        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getLots";
+        $url = ((config('constants.IS_PRODUCTION') == 0) ? config('constants.LANDHUB_BASE_URL') : config('constants.LANDHUB_BASE_URL_NEW')) . "NicApi/getLots";
         $method = 'POST';
         $data['dist_code'] = $dist_code;
         $data['subdiv_code'] = $subdiv_code;
@@ -270,7 +270,7 @@ class LocationController extends Controller
         $mouza_pargona_code = $request->mouza_pargona_code;
         $lot_no = $request->lot_no;
         $data = [];
-        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getVillages";
+        $url = ((config('constants.IS_PRODUCTION') == 0) ? config('constants.LANDHUB_BASE_URL') : config('constants.LANDHUB_BASE_URL_NEW')) . "NicApi/getVillages";
         $method = 'POST';
         $data['dist_code'] = $dist_code;
         $data['subdiv_code'] = $subdiv_code;
@@ -335,7 +335,7 @@ class LocationController extends Controller
     {
         $dist_code = $request->dist_code;
         $data = [];
-        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getLandClassesAndPattaTypes";
+        $url = ((config('constants.IS_PRODUCTION') == 0) ? config('constants.LANDHUB_BASE_URL') : config('constants.LANDHUB_BASE_URL_NEW')) . "NicApi/getLandClassesAndPattaTypes";
         $method = 'POST';
         $data['dist_code'] = $dist_code;
         $data['apikey'] = "chithaentry_resurvey";
@@ -393,7 +393,7 @@ class LocationController extends Controller
         $patta_type_code = $request->patta_type_code;
 
         $data = [];
-        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getPattaNos";
+        $url = ((config('constants.IS_PRODUCTION') == 0) ? config('constants.LANDHUB_BASE_URL') : config('constants.LANDHUB_BASE_URL_NEW')) . "NicApi/getPattaNos";
         $method = 'POST';
         $data['dist_code'] = $dist_code;
         $data['subdiv_code'] = $subdiv_code;
@@ -459,7 +459,7 @@ class LocationController extends Controller
         $vill_townprt_code = $request->vill_townprt_code;
 
         $data = [];
-        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getDags";
+        $url = ((config('constants.IS_PRODUCTION') == 0) ? config('constants.LANDHUB_BASE_URL') : config('constants.LANDHUB_BASE_URL_NEW')) . "NicApi/getDags";
         $method = 'POST';
         $data['dist_code'] = $dist_code;
         $data['subdiv_code'] = $subdiv_code;
@@ -525,7 +525,7 @@ class LocationController extends Controller
         $data['patta_no'] = $request->patta_no;
         $data['patta_type_code'] = $request->patta_type_code;
 
-        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getPattadarForDemarcation";
+        $url = ((config('constants.IS_PRODUCTION') == 0) ? config('constants.LANDHUB_BASE_URL') : config('constants.LANDHUB_BASE_URL_NEW')) . "NicApi/getPattadarForDemarcation";
         $method = 'POST';
 
         $data['apikey'] = "chithaentry_resurvey";
@@ -646,7 +646,7 @@ class LocationController extends Controller
         $data['patta_type_code'] = $request->patta_type_code;
         $data['apikey'] = "demarcation_app";
 
-        $url = config('constants.LANDHUB_BASE_URL') . "NicApi/getKhajanaAmount";
+        $url = ((config('constants.IS_PRODUCTION') == 0) ? config('constants.LANDHUB_BASE_URL') : config('constants.LANDHUB_BASE_URL_NEW')) . "NicApi/getKhajanaAmount";
         $method = 'POST';
         $api_output = callApi($url, $method, $data);
         

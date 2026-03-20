@@ -39,12 +39,13 @@ class LmController extends Controller
 
         $serial = 0;
         foreach ($getFinalApplications as $finalApplication) {
+            $unique_id = $finalApplication->dist_code . '-' . $finalApplication->subdiv_code . '-' . $finalApplication->cir_code . '-' . $finalApplication->mouza_pargona_code . '-' . $finalApplication->lot_no . '-' . $finalApplication->vill_townprt_code . '-' . $finalApplication->application_no;
             $locations = $locationModel->getLocationNames($finalApplication->dist_code, $finalApplication->subdiv_code, $finalApplication->cir_code, $finalApplication->mouza_pargona_code, $finalApplication->lot_no, $finalApplication->vill_townprt_code);
             // $finalApplication->location = $locations;
             $finalApplication->serial_no = ++$serial;
             $finalApplication->village = $locations['dist_name'] . ' district, ' . $locations['subdiv_name'] . ' subdivision, ' . $locations['cir_name'] . ' circle, ' . $locations['mouza_name'] . ' mouza, ' . $locations['lot_name'] . ' lot, ' . $locations['vill_name'] . ' village';
             $finalApplication->status_name = $finalApplication->status == 'Q' ? 'Pending' : '';
-            $finalApplication->action = $finalApplication->dist_code . '-' . $finalApplication->subdiv_code . '-' . $finalApplication->cir_code . '-' . $finalApplication->mouza_pargona_code . '-' . $finalApplication->lot_no . '-' . $finalApplication->vill_townprt_code . '-' . $finalApplication->application_no;
+            $finalApplication->action = jwtencode(['uid' => $unique_id]);
         }
 
         
@@ -64,7 +65,7 @@ class LmController extends Controller
         $mouza_pargona_code = $decodedToken->mouza_pargona_code;
         $lot_no = $decodedToken->lot_no;
 
-        $app_no = $request->id;
+        $app_no = jwtdecode($request->id)->uid;
         $app_no_arr = explode('-', $app_no);
 
         $vill_townprt_code = $app_no_arr[5];
@@ -119,7 +120,8 @@ class LmController extends Controller
         $application_data = [
             'application_no' => $application[0]->application_no,
             'aadhaar_verified' => $application[0]->aadhaar_verified,
-            'status' => ($application[0]->status == "Q") ? "Pending with LRA" : ""
+            'status' => ($application[0]->status == "Q") ? "Pending with LRA" : "",
+            // 'bhunaksha_available' => ($respData == true) ? 1 : 0
         ];
 
         $dag_data = [];
@@ -128,12 +130,35 @@ class LmController extends Controller
 
         if(!empty($dag_details)) {
             foreach ($dag_details as $dag) {
+                $dag_no = $dag->dag_no;
+                $data = [
+                    'locationCode' => $dist_code . $subdiv_code . $cir_code . $mouza_pargona_code . $lot_no . $vill_townprt_code,
+                    'plotNo' => $dag_no
+                ];
+                $response = callLandhubAPIWithHeader('POST', 'NicApi/IsPlotExist', $data);
+                if($response["error"] != "") {
+                    return response()->json([
+                        'status' => 'n',
+                        'msg' => $response["error"],
+                    ], 500);
+                }
+                $resp = json_decode($response["data"]);
+                $status = $resp->status;
+                if($status != "200") {
+                    return response()->json([
+                        'status' => 'n',
+                        'msg' => "Bhunaksha API Error!",
+                    ], 500);
+                }
+                $respData = $resp->data;
+
                 $dag->dist_code = $application[0]->dist_code;
                 $dag->subdiv_code = $application[0]->subdiv_code;
                 $dag->cir_code = $application[0]->cir_code;
                 $dag->mouza_pargona_code = $application[0]->mouza_pargona_code;
                 $dag->lot_no = $application[0]->lot_no;
                 $dag->vill_townprt_code = $application[0]->vill_townprt_code;
+                $dag->bhunaksha_available = ($respData == true) ? 1 : 0;
                 if(in_array($dist_code, config('constants.BARAK_VALLEY'))) {
                     $dag->dag_area = $dag->dag_area_b . ' B - ' . $dag->dag_area_k . ' K - ' . $dag->dag_area_lc . ' C - ' . $dag->dag_area_g . ' G';
                     $dag->app_dag_area = $dag->app_dag_area_b . ' B - ' . $dag->app_dag_area_k . ' K - ' . $dag->app_dag_area_lc . ' C - ' . $dag->app_dag_area_g . ' G';

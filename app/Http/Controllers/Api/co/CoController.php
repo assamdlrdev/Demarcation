@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\co;
 use App\Http\Controllers\Controller;
 use App\Models\CoModel;
 use App\Models\LocationModel;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -40,13 +41,14 @@ class CoController extends Controller
 
         $serial = 0;
         foreach ($applications as $finalApplication) {
+            $unique_id = $finalApplication->dist_code . '-' . $finalApplication->subdiv_code . '-' . $finalApplication->cir_code . '-' . $finalApplication->mouza_pargona_code . '-' . $finalApplication->lot_no . '-' . $finalApplication->vill_townprt_code . '-' . $finalApplication->application_no;
             $locations = $locationModel->getLocationNames($finalApplication->dist_code, $finalApplication->subdiv_code, $finalApplication->cir_code, $finalApplication->mouza_pargona_code, $finalApplication->lot_no, $finalApplication->vill_townprt_code);
             // $finalApplication->location = $locations;
             $finalApplication->serial_no = ++$serial;
             $finalApplication->village = $locations['dist_name'] . ' district, ' . $locations['subdiv_name'] . ' subdivision, ' . $locations['cir_name'] . ' circle, ' . $locations['mouza_name'] . ' mouza, ' . $locations['lot_name'] . ' lot, ' . $locations['vill_name'] . ' village';
             $finalApplication->status = $finalApplication->status;
             $finalApplication->status_name = $finalApplication->status == 'A' ? 'Pending' : ($finalApplication->status == 'B' ? 'Notice Issued' : '');
-            $finalApplication->action = $finalApplication->dist_code . '-' . $finalApplication->subdiv_code . '-' . $finalApplication->cir_code . '-' . $finalApplication->mouza_pargona_code . '-' . $finalApplication->lot_no . '-' . $finalApplication->vill_townprt_code . '-' . $finalApplication->application_no;
+            $finalApplication->action = jwtencode(['uid' => $unique_id]);
         }
 
         return response()->json([
@@ -67,7 +69,7 @@ class CoController extends Controller
         $user_code = $decodedToken->usercode;
         $user_desig_code = $decodedToken->user_desig_code;
 
-        $id = $request->id;
+        $id = jwtdecode($request->id)->uid;
         $idArr = explode('-', $id);
         $mouza_pargona_code = $idArr[3];
         $lot_no = $idArr[4];
@@ -140,7 +142,7 @@ class CoController extends Controller
     public function getMap(Request $request) {
         $decodedToken = jwtdecode($request->bearerToken());
 
-        $id = $request->id;
+        $id = jwtdecode($request->id)->uid;
         $idArr = explode('-', $id);
         $dist_code = $idArr[0];
         $subdiv_code = $idArr[1];
@@ -200,7 +202,7 @@ class CoController extends Controller
             }
 
             $coModel->connection = $demarcation_connection;
-            $demarcationUpdate = $coModel->demarcationUpdate($dist_code, $subdiv_code, $cir_code, $application_no);
+            $demarcationUpdate = $coModel->demarcationUpdate($dist_code, $subdiv_code, $cir_code, $application_no, 'B');
             if ($demarcationUpdate['status'] != 'y') {
                 throw new \Exception($demarcationUpdate['msg'] ?? 'Demarcation update failed');
             }
@@ -224,5 +226,62 @@ class CoController extends Controller
                 'msg' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function sendForFieldVerification(Request $request) {
+        $decodedToken = jwtdecode($request->bearerToken());
+        $application_no = $request->application_no;
+        $hearing_date = $request->hearing_date;
+
+        $dist_code = $decodedToken->dcode;
+        $subdiv_code = $decodedToken->subdiv_code;
+        $cir_code = $decodedToken->cir_code;
+        $user_code = $decodedToken->usercode;
+        $user_desig_code = $decodedToken->user_desig_code;
+
+        $coModel = new CoModel();
+        $district_connection = $coModel->connection = $coModel->dbswitch($dist_code);
+        $demarcation_connection = $coModel->dbswitch('demarcation');
+
+        DB::connection($district_connection)->beginTransaction();
+        DB::connection($demarcation_connection)->beginTransaction();
+
+        try {
+            $authorizeApplication = $coModel->authorizeApplication($dist_code, $subdiv_code, $cir_code, $application_no);
+            if($authorizeApplication['status'] != 'y') {
+                throw new \Exception($authorizeApplication['msg'] ?? 'Not Authorized!');
+            }
+
+            $response = $coModel->fieldVerificationOrder($dist_code, $subdiv_code, $cir_code, $application_no, $hearing_date, $user_code, $user_desig_code);
+            if($response['status'] != 'y') {
+                throw new \Exception($response['msg'] ?? 'Could not update Application!');
+            }
+
+            $coModel->connection = $demarcation_connection;
+            $demarcationUpdate = $coModel->demarcationUpdate($dist_code, $subdiv_code, $cir_code, $application_no, 'C');
+            if ($demarcationUpdate['status'] != 'y') {
+                throw new \Exception($demarcationUpdate['msg'] ?? 'Could not update Demarcation Status!');
+            }
+
+            DB::connection($district_connection)->commit();
+            DB::connection($demarcation_connection)->commit();
+
+            return response()->json([
+                'status' => 'y',
+                'msg' => 'Successfully Sent for Field Verification to LRA!'
+            ], 200);
+        }
+        catch(\Exception $e) {
+            // Rollback both on any failure
+            DB::connection($district_connection)->rollBack();
+            DB::connection($demarcation_connection)->rollBack();
+
+            return response()->json([
+                'status' => 'n',
+                'msg' => $e->getMessage()
+            ], 500);
+        }
+        
+
     }
 }

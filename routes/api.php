@@ -16,6 +16,7 @@ Route::post('get_co_first_cases', [App\Http\Controllers\Api\co\CoController::cla
 Route::post('get_co_specified_application', [App\Http\Controllers\Api\co\CoController::class, 'getCoSpecifiedApplication'])->middleware('jwt');
 Route::post('get_map', [App\Http\Controllers\Api\co\CoController::class, 'getMap'])->middleware('jwt');
 Route::post('issue_notice', [App\Http\Controllers\Api\co\CoController::class, 'issueNotice'])->middleware('jwt');
+Route::post('send_for_field_verification', [App\Http\Controllers\Api\co\CoController::class, 'sendForFieldVerification'])->middleware('jwt');
 
 // Route::middleware('jwt')->group(function () {
 Route::post('get-districts', [App\Http\Controllers\Api\LocationController::class, 'getDistricts']);
