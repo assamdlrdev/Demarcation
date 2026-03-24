@@ -128,6 +128,8 @@ class LmController extends Controller
         $applicant_data = [];
         $pattadar_data = [];
 
+        $bhunaksha_dag_availability = [];
+
         if(!empty($dag_details)) {
             foreach ($dag_details as $dag) {
                 $dag_no = $dag->dag_no;
@@ -159,6 +161,9 @@ class LmController extends Controller
                 $dag->lot_no = $application[0]->lot_no;
                 $dag->vill_townprt_code = $application[0]->vill_townprt_code;
                 $dag->bhunaksha_available = ($respData == true) ? 1 : 0;
+                
+                $bhunaksha_dag_availability[] = $dag->bhunaksha_available;
+                
                 if(in_array($dist_code, config('constants.BARAK_VALLEY'))) {
                     $dag->dag_area = $dag->dag_area_b . ' B - ' . $dag->dag_area_k . ' K - ' . $dag->dag_area_lc . ' C - ' . $dag->dag_area_g . ' G';
                     $dag->app_dag_area = $dag->app_dag_area_b . ' B - ' . $dag->app_dag_area_k . ' K - ' . $dag->app_dag_area_lc . ' C - ' . $dag->app_dag_area_g . ' G';
@@ -176,6 +181,13 @@ class LmController extends Controller
                 $applicant_data[] = $dag;
             }
             $pattadar_data = $lmModel->getPattadars($application[0]->dist_code, $application[0]->subdiv_code, $application[0]->cir_code, $application[0]->mouza_pargona_code, $application[0]->lot_no, $application[0]->vill_townprt_code, $dag_details[0]->dag_no);
+        }
+
+        if(in_array(0, $bhunaksha_dag_availability)) {
+            $application_data['bhunaksha_available'] = 0;
+        }
+        else {
+            $application_data['bhunaksha_available'] = 1;
         }
 
         $payload = [
