@@ -524,6 +524,7 @@ class LocationController extends Controller
         $data['vill_townprt_code'] = $request->vill_townprt_code;
         $data['patta_no'] = $request->patta_no;
         $data['patta_type_code'] = $request->patta_type_code;
+        $data['dag_no'] = $request->dag_no;
 
         $url = ((config('constants.IS_PRODUCTION') == 0) ? config('constants.LANDHUB_BASE_URL') : config('constants.LANDHUB_BASE_URL_NEW')) . "NicApi/getPattadarForDemarcation";
         $method = 'POST';
